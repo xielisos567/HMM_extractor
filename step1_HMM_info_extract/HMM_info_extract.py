@@ -5,6 +5,7 @@ import os
 import sys
 import glob
 import pandas as pd
+import argparse
 from collections import defaultdict
 
 def getLable(lable):
@@ -83,6 +84,7 @@ def getData(file_path, lable, score, out):
                            headers[key].append(line[start:idx].strip())
                            start = idx + 1
                        headers[header_line[start:]].append(line[start:].strip())
+
                 elif line.startswith('# Program') and total == 0:
                     break
                 elif line.startswith('# Target file') and file_index == 1:
@@ -105,24 +107,24 @@ def getData(file_path, lable, score, out):
     out_data.to_csv(out, sep=',', index=False)
 
 if __name__ == '__main__':
-    if len(sys.argv) != 6:
-        print('Usage: python3 hmmsearch-parse.py lable_name lable_path data_path out_path score')
+    parser = argparse.ArgumentParser(description='HMM_info_extract')
+    parser.add_argument("-l", '--label', required=True, help='label name')
+    parser.add_argument("-p", '--label_path', required=True, help="label path")
+    parser.add_argument("-d", '--data_path', required=True, help='data path')
+    parser.add_argument("-s", '--score', required=True, help='score')
+    parser.add_argument("-o", '--output', required=True, help='output path')
+    args = parser.parse_args()
+
+    labels = getLabel(f'{args.label_path}/{args.label}.txt')
+
+    if not os.path.exists(args.data_path):
+        #print(f"error：data path '{args.data_path}' not exit。")
         sys.exit(1)
 
-    lable_name = sys.argv[1]
-    lable_path = sys.argv[2]
-    data_path = sys.argv[3]
-    out_path = sys.argv[4]
-    score_set = int(sys.argv[5])
+    if not os.path.exists(args.out_path):
+        os.makedirs(args.out_path)
 
-    lables = getLable(f'{lable_path}/{lable_name}.txt')
-
-    if os.path.exists(out_path):
-        pass
-    else:
-        os.makedirs(out_path)
-
-    for file_path in glob.glob(f'{data_path}/*tab'):
+    for file_path in glob.glob(f'{args.data_path}/*.csv'):
         out_name = os.path.basename(file_path)
-        if re.search(lable_name, file_path):
-            getData(file_path, lables, score_set, f'{out_path}/{out_name}.csv')
+        if re.search(args.label, file_path):
+            getData(file_path, labels, int(args.score), f'{args.out_path}/{out_name}.csv')
