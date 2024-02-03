@@ -4,7 +4,7 @@ This includes the step1_HMM_info_extract and the step2_HMM_gene_extract files, t
 
 ### step1:
 ```
-python3 HMM_info_extract.py lable_name path/lable path/data path/result score
+python3 HMM_info_extract.py -l lable_name -p path/lable -d path/data  -o path/result -s score
 ```
 ### step2:
 ```
